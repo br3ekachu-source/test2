@@ -1,0 +1,68 @@
+.sudno-AdvertCard {
+    position: relative;
+    transition: box-shadow 0.2s;
+    padding: 15px;
+    margin: 15px 0;
+    border-radius: var(--main-app-br);
+}
+
+.sudno-AdvertCard-shadow {
+    box-shadow: 0 0 20px rgba(128, 128, 128, 0.2);
+}
+
+.sudno-AdvertCard:hover {
+    box-shadow: 0 0 20px rgba(128, 128, 128, 0.2);
+    cursor: pointer;
+}
+
+.sudno-AdvertCard-draft::after {
+    content: "";
+    opacity: 0;
+}
+.paddingLeft {
+    padding-left: 1rem;
+}
+
+.sudno-AdvertCard-draft:hover::after {
+    content: "Продолжить создание →";
+    position: absolute;
+    opacity: 1;
+    transition: opacity 0.2s linear;
+    color: black;
+    font-size: 16px;
+    top: 0;
+    left: 0;
+    display: flex;
+    justify-content: end;
+    align-items: end;
+    padding-right: 12px;
+    padding-bottom: 12px;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.05);
+    z-index: 2;
+    border-radius: var(--main-app-br);
+}
+
+.sudno-AdvertCard-details-label {
+    color: rgba(0, 0, 0, 0.45);
+}
+
+@media (min-width: 768px) and (max-width: 1000px) {
+    .sudno-AdvertCard-description {
+        display: none;
+    }
+}
+
+@media screen and (max-width: 768px) {
+    .favButton {
+        position: absolute;
+        right: 10px;
+    }
+    .paddingLeft {
+        padding-left: 0px;
+    }
+    .mTop {
+        margin-top: 1rem;
+    }
+}

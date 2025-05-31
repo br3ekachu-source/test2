@@ -1,0 +1,40 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+    --main-app-br: 6px;
+    --header-height: 48px;
+    --primary-color: #34a8ff;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+
+    ::-webkit-scrollbar {
+        display: none;
+    }
+}
+
+body {
+    min-width: 375px;
+}
+
+body.lock {
+    overflow: hidden;
+}
+
+body.lock {
+    overflow: hidden;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+    margin: 0;
+}

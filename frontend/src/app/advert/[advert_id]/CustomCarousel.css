@@ -1,0 +1,83 @@
+.slider {
+    height: 450px;
+    background-color: #34a8ff !important;
+}
+.slide {
+    height: 450px !important;
+    object-fit: cover;
+    width: 100%;
+    z-index: 0 !important;
+}
+.swiper-button-prev {
+    color: rgb(136, 136, 140);
+    transition: color 0.2s ease-in;
+}
+
+.swiper-button-next {
+    color: rgb(136, 136, 140);
+    transition: color 0.2s ease-in;
+}
+.swiper-button-prev:hover {
+    color: rgb(180, 180, 184);
+}
+
+.swiper-button-next:hover {
+    color: rgb(180, 180, 184);
+}
+.fav-button {
+    position: absolute !important;
+    right: 10px;
+    top: 5px;
+    height: 45px !important;
+    width: 45px !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    margin: 4px 0px !important;
+    cursor: pointer !important;
+    z-index: 100;
+    border: 0px !important;
+}
+
+@media screen and (max-width: 1050px) {
+    .slide {
+        height: 450px !important;
+    }
+}
+@media screen and (max-width: 950px) {
+    .slide {
+        height: 430px !important;
+    }
+}
+@media screen and (max-width: 840px) {
+    .slide {
+        height: 500px !important;
+    }
+}
+@media screen and (max-width: 740px) {
+    .slide {
+        height: 400px !important;
+    }
+}
+
+@media screen and (max-width: 500px) {
+    .slide {
+        height: 260px !important;
+    }
+}
+/* =====================MODAL SLIDER =============================*/
+
+.modal-swipper__container {
+    height: 80vh;
+}
+
+.modal-swipper__swipper {
+    height: 100%;
+    width: 100%;
+}
+
+.modal-swipper__image {
+    object-fit: cover;
+    height: 100%;
+    width: 100%;
+}

@@ -1,0 +1,21 @@
+.other-adverts-container {
+    width: 100%;
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr 1fr;
+    column-gap: 15px;
+    row-gap: 15px;
+    margin-bottom: 40px;
+}
+.other-adverts-button {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 20px 0;
+}
+@media screen and (max-width: 840px) {
+    .other-adverts-container {
+        grid-template-columns: 1fr 1fr;
+        row-gap: 5px;
+        margin-bottom: 20px;
+    }
+}

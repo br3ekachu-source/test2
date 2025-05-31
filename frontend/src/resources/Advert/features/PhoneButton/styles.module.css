@@ -1,0 +1,19 @@
+.phone-button__container_copy {
+    color: #52c41a !important;
+    border-color: rgba(82, 196, 26, 0.5) !important;
+}
+
+.phone-button__container_copy:hover {
+    color: #52c41a !important;
+    border-color: rgba(82, 196, 26, 1) !important;
+}
+@media screen and (max-width: 996px) {
+    .small-device {
+        font-size: 11px !important;
+    }
+}
+@media screen and (max-width: 760px) {
+    .small-device {
+        font-size: 14px !important;
+    }
+}
