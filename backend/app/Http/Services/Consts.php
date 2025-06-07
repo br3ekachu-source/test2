@@ -34,11 +34,24 @@ enum AdvertStateOnRU: string
 }
 
 enum AdvertState:int {
+    use EnumToArray;
+
     case Draft = 1; //черновик
     case Moderation = 2; //на модерации
     case Active = 3; //активное
     case Inactive = 4; //неактивное
     case Deleted = 0; //удаленное
+
+    public static function arrayOnRU(): array
+    {
+        return [
+            1 => 'Черновик',
+            2 => 'На модерации',
+            3 => 'Активное',
+            4 => 'Неактивное',
+            0 => 'Удаленное',
+        ];
+    }
 }
 
 enum VesselType:int {
