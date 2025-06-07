@@ -26,6 +26,10 @@ class Advert extends Model
         'can_edit'
     ];
 
+    protected $fillable = [
+        'state',
+    ];
+
     public function getImagesAttribute($value)
     {
         $images = [];
