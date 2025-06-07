@@ -64,6 +64,15 @@ enum VesselType:int {
 enum ExploitationType:int {
     case Commercial = 0;//коммерческое
     case NonCommercial = 1;//некоммерческое
+
+    public static function fromLabel(string $label): ?int
+    {
+        return match($label) {
+            '0' => self::Commercial->value,
+            '1' => self::NonCommercial->value,
+            default => null
+        };
+    }
 }
 
 enum AdvertType:int {
@@ -123,10 +132,11 @@ class Consts
 
     public static function getExploitationType(){
         return [
-            1 => 'Коммерческое',
-            0 => 'Некоммерческое'
+            0 => 'Коммерческое',
+            1 => 'Некоммерческое',
         ];
     }
+
     public static function getMaterials(){
         return [
             4 => 'Сталь',

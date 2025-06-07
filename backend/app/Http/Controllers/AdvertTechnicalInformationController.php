@@ -5,7 +5,9 @@ namespace App\Http\Controllers;
 use App\Http\Requests\AdvertTechnicalInformationStoreRequest;
 use App\Http\Services\AdvertState;
 use App\Models\AdvertTechnicalInformation;
+use App\Services\TelegramNotificationService;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 
 class AdvertTechnicalInformationController extends Controller
 {
@@ -28,6 +30,13 @@ class AdvertTechnicalInformationController extends Controller
         $advertTechnicalInformation = AdvertTechnicalInformation::create($data);
         $advert->state = AdvertState::Moderation;
         $advert->save();
+        try {
+            $telegramService = new TelegramNotificationService();
+            $telegramService->sendNewAdvertNotification($advert);
+        } catch (\Exception $e) {
+            Log::error('Ошибка отправки в Telegram: ' . $e->getMessage());
+        }
+
         return $advertTechnicalInformation;
     }
 

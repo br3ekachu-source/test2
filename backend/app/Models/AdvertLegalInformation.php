@@ -33,6 +33,10 @@ class AdvertLegalInformation extends Model
         'technical_documentation'
     ];
 
+    protected $casts = [
+        'exploitation_type' => 'integer'
+    ];
+
     public function advert(): BelongsTo
     {
         return $this->belongsTo(Advert::class);
