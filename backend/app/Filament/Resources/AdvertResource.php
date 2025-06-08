@@ -6,13 +6,17 @@ use App\Filament\Resources\AdvertResource\Pages;
 use App\Filament\Resources\AdvertResource\RelationManagers;
 use App\Http\Services\AdvertState;
 use App\Http\Services\AdvertStateOnRU;
+use App\Http\Services\AdvertType;
 use App\Http\Services\Consts;
 use App\Http\Services\ExploitationType;
+use App\Http\Services\VesselType;
 use App\Models\Advert;
 use Filament\Forms;
+use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
+use Filament\Tables\Columns\ImageColumn;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
@@ -229,8 +233,34 @@ class AdvertResource extends Resource
                     ->sortable(),
                 Tables\Columns\TextColumn::make('advert_type')
                     ->label('Тип объявления')
-                    ->numeric()
+                    ->formatStateUsing(function ($state) {
+                        return Consts::getAdvertTypes()[$state] ?? 'Неизвестно';
+                    })
+                    ->color(function ($state) {
+                        return match($state) {
+                            0 => 'success', // Продажа
+                            1 => 'primary', // Фрахт
+                            default => 'gray',
+                        };
+                    })
                     ->sortable(),
+                ImageColumn::make('preview_image')
+                    ->label('Главное фото')
+                    ->size(60) // Размер в пикселях
+                    ->getStateUsing(function ($record) {
+                        $images = $record->images ?? [];
+                        return count($images) ? $images[0] : null;
+                    })
+                    ->action(
+                        \Filament\Tables\Actions\Action::make('viewImages')
+                            ->modalHeading('Галерея изображений')
+                            ->modalContent(function ($record) {
+                                $images = $record->images ?? [];
+                                $fullUrls = array_map(fn($path) => $path, $images);
+                                
+                                return view('filament.advert-images-modal', ['images' => $fullUrls]);
+                            })
+                    ),
                 Tables\Columns\TextColumn::make('registration_number')
                     ->label('Регистрационный номер')
                     ->searchable(),
@@ -239,7 +269,17 @@ class AdvertResource extends Resource
                     ->money()
                     ->sortable(),
                 Tables\Columns\TextColumn::make('state')
-                    ->label('Статус объявления')
+                    ->label('Статус')
+                    ->badge()
+                    ->color(fn (AdvertState $state) => match($state->value) {
+                        0 => 'dark',      // Удаленное
+                        1 => 'gray',      // Черновик
+                        2 => 'warning',   // На модерации
+                        3 => 'success',   // Активное
+                        4 => 'danger',    // Неактивное
+                        default => 'gray',
+                    })
+                    ->formatStateUsing(fn (AdvertState $state) => AdvertState::arrayOnRU()[$state->value] ?? $state->name)
                     ->sortable(),
                 Tables\Columns\TextColumn::make('header')
                     ->label('Заголовок')
@@ -273,9 +313,70 @@ class AdvertResource extends Resource
                     ->suffix(' м'),
             ])
             ->filters([
+                // Фильтр по статусу
                 Tables\Filters\SelectFilter::make('state')
+                    ->label('Статус')
                     ->options(AdvertState::arrayOnRU())
-                    ->label('Статус'),
+                    ->multiple()
+                    ->native(false),
+                
+                // Фильтр по типу объявления
+                Tables\Filters\SelectFilter::make('advert_type')
+                    ->label('Тип объявления')
+                    ->options(Consts::getAdvertTypes() ?? [
+                        0 => 'Продажа',
+                        1 => 'Фрахт'
+                    ])
+                    ->multiple()
+                    ->native(false),           
+                
+                // Фильтр по цене (диапазон)
+                Tables\Filters\Filter::make('price')
+                    ->form([
+                        Forms\Components\TextInput::make('price_from')
+                            ->label('Цена от')
+                            ->numeric(),
+                        Forms\Components\TextInput::make('price_to')
+                            ->label('Цена до')
+                            ->numeric(),
+                    ])
+                    ->query(function (Builder $query, array $data): Builder {
+                        return $query
+                            ->when($data['price_from'],
+                                fn($q) => $q->where('price', '>=', $data['price_from'])
+                            )
+                            ->when($data['price_to'],
+                                fn($q) => $q->where('price', '<=', $data['price_to'])
+                            );
+                    }),
+                
+                // Фильтр по дате создания
+                Tables\Filters\Filter::make('created_at')
+                    ->form([
+                        Forms\Components\DatePicker::make('created_from')
+                            ->label('С'),
+                        Forms\Components\DatePicker::make('created_until')
+                            ->label('По'),
+                    ])
+                    ->query(function (Builder $query, array $data): Builder {
+                        return $query
+                            ->when($data['created_from'],
+                                fn($q) => $q->whereDate('created_at', '>=', $data['created_from'])
+                            )
+                            ->when($data['created_until'],
+                                fn($q) => $q->whereDate('created_at', '<=', $data['created_until'])
+                            );
+                    }),
+                
+                // Фильтр по наличию технической информации
+                Tables\Filters\Filter::make('has_technical_info')
+                    ->label('С техническими данными')
+                    ->query(fn(Builder $query): Builder => $query->whereHas('advertTechnicalInformation')),
+                
+                // Фильтр по наличию юридической информации
+                Tables\Filters\Filter::make('has_legal_info')
+                    ->label('С юридическими данными')
+                    ->query(fn(Builder $query): Builder => $query->whereHas('advertLegalInformation')),
             ])
             ->actions([
                 Tables\Actions\ViewAction::make(),
