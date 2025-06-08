@@ -3,24 +3,16 @@
 namespace App\Filament\Resources;
 
 use App\Filament\Resources\AdvertResource\Pages;
-use App\Filament\Resources\AdvertResource\RelationManagers;
 use App\Http\Services\AdvertState;
-use App\Http\Services\AdvertStateOnRU;
-use App\Http\Services\AdvertType;
 use App\Http\Services\Consts;
-use App\Http\Services\ExploitationType;
-use App\Http\Services\VesselType;
 use App\Models\Advert;
 use Filament\Forms;
-use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Columns\ImageColumn;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\SoftDeletingScope;
-use Illuminate\Support\Facades\Log;
 
 class AdvertResource extends Resource
 {
@@ -49,6 +41,17 @@ class AdvertResource extends Resource
                             ->label('Тип объявления')
                             ->options(Consts::getAdvertTypes())
                             ->native(false),
+                        Forms\Components\Actions::make([
+                            Forms\Components\Actions\Action::make('viewImages')
+                                ->label('Просмотр всех изображений')
+                                ->icon('heroicon-o-photo')
+                                ->modalHeading('Галерея изображений')
+                                ->modalContent(function ($record) {
+                                    $images = $record->images ?? [];
+                                    return view('filament.advert-images-modal', ['images' => $images]);
+                                })
+                                ->hidden(fn ($record) => empty($record?->images)),
+                            ]),
                         Forms\Components\TextInput::make('registration_number')
                             ->required()
                             ->label('Регистрационный номер')
