@@ -199,8 +199,11 @@ class AdvertController extends Controller
                     $sort = 'desc';
                     break;
                 case 'views':
-                    $orderBy = 'views';
-                    $sort = 'desc';
+                    // Для сортировки по просмотрам используем подзапрос
+                    $adverts->select('adverts.*')
+                        ->leftJoin('advert_views', 'adverts.id', '=', 'advert_views.advert_id')
+                        ->groupBy('adverts.id')
+                        ->orderByRaw('COUNT(advert_views.id) DESC');
                     break;
                 default:
                     $orderBy = 'created_at';
@@ -292,7 +295,7 @@ class AdvertController extends Controller
         $advert->AdvertLegalInformation == null ?: $response['advert_legal_information']['exploitation_type'] = $advert->AdvertLegalInformation->getRawOriginal('exploitation_type');
         $advert->AdvertLegalInformation == null ?: $response['advert_legal_information']['type'] = $advert->AdvertLegalInformation->getRawOriginal('type');
         $advert->AdvertLegalInformation == null ?: $response['advert_legal_information']['vessel_status'] = $advert->AdvertLegalInformation->getRawOriginal('vessel_status');
-        $advert->AdvertLegalInformation == null ?: $response['advert_technical_information']['material'] = $advert->AdvertLegalInformation->getRawOriginal('material');
+        $advert->AdvertTechnicalInformation == null ?: $response['advert_technical_information']['material'] = $advert->AdvertTechnicalInformation->getRawOriginal('material');
 
         return $response;
     }
@@ -352,22 +355,21 @@ class AdvertController extends Controller
         return response()->json(['in_favorite' => false], 200);
     }
 
-    public function getFavorites(Request $request) {
-        $adverts = Advert::whereHas('favoritesUsers', function ($query) use ($request) {
-            $query->where('favorites.user_id', '=', $request->user()->id);
-        })
-        ->with('AdvertLegalInformation', 'AdvertTechnicalInformation', 'user:id,name,avatar')->paginate(12);
-        if ($request->user() != null){
-            $myFavorites = Favorite::where('user_id', '=', $request->user()->id)->select('advert_id')->get();
-            foreach ($adverts as $advert) {
-                $advert['in_favorites'] = $myFavorites->contains('advert_id', $advert->id) ? true : false;
-            }
+    public function getFavorites(Request $request) 
+    {
+        if (!$request->user()) {
+            return response()->json(['message' => 'Unauthorized'], 401);
         }
-        else {
-            foreach ($adverts as $advert) {
-                $advert['in_favorites'] = false;
-            }
+
+        $adverts = $request->user()
+            ->favorites()
+            ->with('AdvertLegalInformation', 'AdvertTechnicalInformation', 'user:id,name,avatar')
+            ->paginate(12);
+
+        foreach ($adverts as $advert) {
+            $advert['in_favorites'] = true;
         }
+
         return $adverts;
     }
 

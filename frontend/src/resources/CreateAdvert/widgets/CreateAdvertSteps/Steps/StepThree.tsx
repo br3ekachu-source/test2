@@ -104,7 +104,7 @@ export function CreateAdvertStepThree({ onFinish }: { onFinish: onFinishStep }) 
                 label='Материал корпуса'
                 labelAlign='left'
                 name='material'
-                initialValue={advert_technical_information?.material}
+                initialValue={advert_technical_information?.material.toString()}
                 rules={[{ required: true, message: 'Обязательное поле' }]}
             >
                 <Select placeholder='Материал корпуса' options={materials} />

@@ -58,9 +58,14 @@ class Advert extends Model
         return $this->belongsTo(User::class);
     }
 
-    public function favoritesUsers()
+    public function views()
     {
-        return $this->belongsToMany(Advert::class, 'favorites', 'advert_id', 'user_id')->withTimeStamps();
+        return $this->hasMany(AdvertView::class);
+    }
+
+    public function favoritedByUsers()
+    {
+        return $this->belongsToMany(User::class, 'favorites', 'advert_id', 'user_id')->withTimestamps();
     }
 
     public function getFavoritesCountAttribute()
