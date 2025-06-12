@@ -1,0 +1,73 @@
+# Stage 1: Build stage
+FROM php:8.3-fpm-alpine AS builder
+
+RUN apk add --no-cache \
+    postgresql-dev \
+    libpng-dev \
+    libjpeg-turbo-dev \
+    freetype-dev \
+    libzip-dev \
+    icu-dev \
+    git \
+    unzip
+
+RUN docker-php-ext-configure gd --with-freetype --with-jpeg
+RUN docker-php-ext-install -j$(nproc) \
+    pdo \
+    pdo_pgsql \
+    gd \
+    zip \
+    intl \
+    opcache \
+    pcntl
+
+RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
+
+COPY --chown=www-data:www-data . /var/www
+WORKDIR /var/www
+
+# Install dependencies without dev packages
+RUN composer install --no-dev --optimize-autoloader --no-interaction --no-progress --no-scripts
+
+# Stage 2: Production image
+FROM php:8.3-fpm-alpine
+
+RUN apk add --no-cache \
+    postgresql-dev \
+    libpng \
+    libjpeg-turbo \
+    freetype \
+    libzip \
+    icu
+
+RUN docker-php-ext-configure gd --with-freetype --with-jpeg
+RUN docker-php-ext-install -j$(nproc) \
+    pdo \
+    pdo_pgsql \
+    gd \
+    zip \
+    intl \
+    opcache \
+    pcntl
+
+# Copy PHP configuration
+COPY docker/php/php.ini /usr/local/etc/php/conf.d/php.ini
+COPY docker/php/php-fpm.conf /usr/local/etc/php-fpm.d/www.conf
+
+# Copy from builder
+COPY --from=builder --chown=www-data:www-data /var/www /var/www
+
+# Create cache directories
+RUN mkdir -p /var/www/storage/framework/{cache,sessions,views} && \
+    mkdir -p /var/www/bootstrap/cache && \
+    chown -R www-data:www-data /var/www/storage /var/www/bootstrap/cache
+
+USER www-data
+WORKDIR /var/www
+
+# Optimize Laravel
+RUN php artisan config:cache && \
+    php artisan route:cache && \
+    php artisan view:cache
+
+CMD ["php-fpm"]
