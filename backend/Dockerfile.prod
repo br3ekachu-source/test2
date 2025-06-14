@@ -12,7 +12,7 @@ RUN apk add --no-cache \
     icu-dev \
     zlib \
     zlib-dev \
-    pkgconf \  # Используем pkgconf вместо pkgconfig
+    pkgconf \
     make \
     g++ \
     autoconf
