@@ -8,6 +8,7 @@ RUN apk add --no-cache \
     freetype-dev \
     libzip-dev \
     icu-dev \
+    zlib-dev \ 
     git \
     unzip
 
