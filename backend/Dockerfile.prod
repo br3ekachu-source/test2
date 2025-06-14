@@ -1,24 +1,27 @@
 # Stage 1: Build stage
 FROM php:8.3-fpm-alpine AS builder
 
-# Установка всех необходимых зависимостей
+# Установка всех необходимых зависимостей (включая zlib и его dev-версию)
 RUN apk add --no-cache \
     postgresql-dev \
     libpng-dev \
     libjpeg-turbo-dev \
     freetype-dev \
+    libwebp-dev \
     libzip-dev \
     icu-dev \
+    zlib \
     zlib-dev \
-    libwebp-dev \
-    git \
-    unzip \
-    pkgconfig # Добавляем явно pkgconfig
+    pkgconf \  # Используем pkgconf вместо pkgconfig
+    make \
+    g++ \
+    autoconf
 
-# Явно указываем пути к библиотекам для pkg-config
-ENV PKG_CONFIG_PATH=/usr/lib/pkgconfig:/usr/share/pkgconfig
+# Явно устанавливаем переменные окружения для zlib
+ENV ZLIB_CFLAGS="-I/usr/include"
+ENV ZLIB_LIBS="-L/usr/lib -lz"
 
-# Конфигурация GD с явным указанием путей
+# Конфигурация GD с явным указанием всех путей
 RUN docker-php-ext-configure gd \
     --with-freetype=/usr/include/ \
     --with-jpeg=/usr/include/ \
@@ -43,15 +46,15 @@ RUN composer install --no-dev --optimize-autoloader --no-interaction --no-progre
 # Stage 2: Production image
 FROM php:8.3-fpm-alpine
 
+# Установка только runtime зависимостей
 RUN apk add --no-cache \
-    postgresql-dev \
     libpng \
     libjpeg-turbo \
     freetype \
+    libwebp \
     libzip \
     icu \
-    zlib \
-    libwebp
+    zlib
 
 # Копируем скомпилированные расширения из builder
 COPY --from=builder /usr/local/lib/php/extensions/no-debug-non-zts-20230831/* /usr/local/lib/php/extensions/no-debug-non-zts-20230831/
