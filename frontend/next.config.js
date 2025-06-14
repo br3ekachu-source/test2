@@ -6,8 +6,4 @@ module.exports = {
   images: {
     unoptimized: true, // Отключаем оптимизацию изображений
   },
-  // Доп. настройки если используете роутер Next.js
-  experimental: {
-    appDir: false, // Для pages/ роутера
-  }
 }
