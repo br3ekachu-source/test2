@@ -9,6 +9,7 @@ RUN apk add --no-cache \
     libzip-dev \
     icu-dev \
     zlib-dev \
+    libwebp-dev \
     git \
     unzip
 
@@ -40,7 +41,8 @@ RUN apk add --no-cache \
     freetype \
     libzip \
     icu \
-    zlib
+    zlib \
+    libwebp
 
 RUN docker-php-ext-configure gd --with-freetype --with-jpeg
 RUN docker-php-ext-install -j$(nproc) \
