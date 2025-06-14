@@ -21,8 +21,6 @@
     "paths": {
       "*": ["./src/resources/*"],
       "@/*": ["./src/*"],
-      "Advert/*": ["./src/Advert/*"],
-      "SydnoComponents/*": ["./src/SydnoComponents/*"]
     }
   },
   "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts"],
