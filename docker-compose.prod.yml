@@ -59,7 +59,7 @@ services:
       - "80:80"
       - "443:443"  # Для HTTPS
     volumes:
-      - ./nginx/prod.conf:/etc/nginx/conf.d/default.conf  # Оптимизированная конфигурация
+      - ./nginx.prod.conf:/etc/nginx/conf.d/default.conf  # Оптимизированная конфигурация
       - ./ssl:/etc/nginx/ssl  # SSL сертификаты
       - laravel_storage:/var/www/storage:ro  # Только чтение
     depends_on:
