@@ -45,7 +45,10 @@ WORKDIR /var/www
 # RUN mkdir -p storage/framework/{cache,sessions,views} storage/logs
 # RUN chown -R www:www storage bootstrap/cache
 # RUN chmod -R 775 storage bootstrap/cache
-
+RUN mkdir -p /var/www/storage/framework/{cache,sessions,views} \
+    && mkdir -p /var/www/storage/logs \
+    && chown -R www:www /var/www/storage \
+    && chmod -R 775 /var/www/storage
 USER www
 
 # # Оптимизация Laravel
