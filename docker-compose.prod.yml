@@ -13,7 +13,7 @@ services:
       - ./backend/.env.prod
     environment:
       - APP_ENV=production
-      - APP_DEBUG=false
+      - APP_DEBUG=true
     extra_hosts:
       - "host.docker.internal:host-gateway"  # Для доступа к хосту из контейнера
     depends_on:
