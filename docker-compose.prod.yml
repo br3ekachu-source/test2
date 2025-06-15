@@ -29,7 +29,8 @@ services:
       interval: 30s
       timeout: 10s
       retries: 3
-    expose: 9000
+    expose: 
+      - 9000
 
   db:
     image: postgres:15-alpine  # Более легковесный образ
