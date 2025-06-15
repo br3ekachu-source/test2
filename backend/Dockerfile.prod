@@ -20,8 +20,7 @@ COPY --chown=www-data:www-data . .
 # Копируем production .env файл
 COPY backend/.env.prod .env
 
-RUN composer install --no-dev --optimize-autoloader \
-    && php artisan optimize:clear \
+RUN php artisan optimize:clear \
     && php artisan config:cache \
     && php artisan route:cache \
     && php artisan view:cache
