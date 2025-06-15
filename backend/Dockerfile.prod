@@ -12,7 +12,6 @@ RUN apk add --no-cache \
     unzip \
     bash
 
-
 # PHP расширения
 RUN docker-php-ext-configure gd --with-freetype --with-jpeg
 RUN docker-php-ext-install -j$(nproc) \
@@ -35,28 +34,27 @@ RUN addgroup -g 1000 www && \
 
 WORKDIR /var/www
 
-# Копируем только необходимые файлы
-# COPY --chown=www:www composer.* ./
-# RUN composer install --no-dev --optimize-autoloader --no-interaction
+# Копируем только composer файлы сначала
+COPY --chown=www:www composer.json composer.lock ./
 
-# COPY --chown=www:www . .
+# Установка зависимостей
+RUN composer install --no-dev --optimize-autoloader --no-interaction
 
-# # Настройка прав
-# RUN mkdir -p storage/framework/{cache,sessions,views} storage/logs
-# RUN chown -R www:www storage bootstrap/cache
-# RUN chmod -R 775 storage bootstrap/cache
-RUN mkdir -p /var/www/storage/framework/{cache,sessions,views} \
-    && mkdir -p /var/www/storage/logs \
-    && chown -R www:www /var/www/storage \
-    && chmod -R 775 /var/www/storage \
-    && chown -R www:www /var/www/composer.*
+# Копируем остальные файлы
+COPY --chown=www:www . .
+
+# Настройка прав
+RUN mkdir -p storage/framework/{cache,sessions,views} storage/logs && \
+    chown -R www:www storage bootstrap/cache && \
+    chmod -R 775 storage bootstrap/cache && \
+    chown www:www composer.json composer.lock
 
 USER www
 
-# # Оптимизация Laravel
-# RUN php artisan config:cache && \
-#     php artisan route:cache && \
-#     php artisan view:cache
+# Оптимизация Laravel
+RUN php artisan config:cache && \
+    php artisan route:cache && \
+    php artisan view:cache
 
 EXPOSE 9000
 CMD ["php-fpm"]
