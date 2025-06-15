@@ -10,7 +10,7 @@ services:
       - ./backend:/var/www
       - /var/www/vendor  # Избегаем перезаписи vendor в контейнере
     env_file:
-      - ./backend/.env
+      - ./backend/.env.prod
     environment:
       - DB_HOST=db
       - DB_PORT=5432
