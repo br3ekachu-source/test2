@@ -1,47 +1,90 @@
-version: '3.8'
-
 services:
   backend:
     build:
-      context: .
-      dockerfile: backend/Dockerfile.prod
+      context: ./backend
+      dockerfile: Dockerfile.prod
+    container_name: laravel_app
+    restart: unless-stopped
+    working_dir: /var/www
     volumes:
       - ./backend:/var/www
-      - ./backend/.env.prod:/var/www/.env
+      - /var/www/vendor  # Избегаем перезаписи vendor в контейнере
+    env_file:
+      - ./backend/.env.prod
     environment:
-      - APP_ENV=production
-    networks:
-      - app-network
-
-  nginx:
-    image: nginx:alpine
-    ports:
-      - "80:80"
-      - "443:443"
-    volumes:
-      - ./nginx.prod.conf:/etc/nginx/conf.d/default.conf
-      - ./backend/public:/var/www/public
+      - DB_HOST=db
+      - DB_PORT=5432
+      - XDEBUG_MODE=develop,debug
+      - XDEBUG_CONFIG="client_host=host.docker.internal"
+      - XDEBUG_CLIENT_PORT=9003
+    extra_hosts:
+      - "host.docker.internal:host-gateway"  # Для доступа к хосту из контейнера
     depends_on:
-      - backend
+      - db
     networks:
-      - app-network
+      - app_network
 
   db:
-    image: postgres:15-alpine
+    image: postgres:15
+    container_name: postgres_db
+    restart: unless-stopped
     env_file:
-      - .env.prod  
+      - .env  # Используем тот же .env файл
     environment:
       - POSTGRES_DB=${DB_DATABASE}
       - POSTGRES_USER=${DB_USERNAME}
       - POSTGRES_PASSWORD=${DB_PASSWORD}
     volumes:
       - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
     networks:
-      - app-network
+      - app_network
+
+  webserver:
+    image: nginx:alpine
+    container_name: nginx_server
+    restart: unless-stopped
+    ports:
+      - "8000:80"
+    volumes:
+      - ./backend:/var/www
+      - ./nginx.prod.conf:/etc/nginx/conf.d/default.conf
+    depends_on:
+      - backend
+    networks:
+      - app_network
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile.prod
+    container_name: next_app
+    restart: unless-stopped
+    working_dir: /app
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+    env_file:
+      - .env.production  # Для доступа к NEXT_PUBLIC_API_URL
+    ports:
+      - "3000:3000"
+    networks:
+      - app_network
+
+  mailpit:
+    image: axllent/mailpit
+    container_name: mailpit
+    restart: unless-stopped
+    ports:
+      - "1025:1025"  # SMTP порт (для отправки писем)
+      - "8025:8025"  # Web-интерфейс
+    networks:
+      - app_network
 
 volumes:
   postgres_data:
 
 networks:
-  app-network:
+  app_network:
     driver: bridge
