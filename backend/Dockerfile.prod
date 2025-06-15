@@ -37,12 +37,9 @@ WORKDIR /var/www
 # Копируем только composer файлы сначала
 COPY --chown=www:www composer.json composer.lock ./
 
-# Замените проблемный участок на:
-RUN if [ -f composer.lock ]; then \
-      composer install --no-dev --optimize-autoloader --no-interaction; \
-    else \
-      composer install --no-dev --optimize-autoloader --no-interaction --prefer-dist; \
-    fi
+# Установка зависимостей (с проверкой целостности)
+RUN composer validate --no-check-all --strict && \
+    composer install --no-dev --optimize-autoloader --no-interaction --ignore-platform-reqs
 
 # Копируем остальные файлы
 COPY --chown=www:www . .
