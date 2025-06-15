@@ -10,7 +10,7 @@ services:
     working_dir: /var/www
     volumes:
       - ./backend:/var/www
-      - ./docker/php/php-fpm.conf:/usr/local/etc/php-fpm.d/www.conf
+      - ./backend/docker/php/php-fpm.conf:/usr/local/etc/php-fpm.d/www.conf
       - php-sockets:/var/run/php-fpm
     env_file:
       - .env.prod  # Отдельный файл для прода
