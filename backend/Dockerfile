@@ -39,6 +39,10 @@ COPY . /var/www
 
 COPY --chown=www:www . /var/www
 
+RUN mkdir -p /var/www/storage/logs /var/www/storage/framework/{cache,sessions,testing,views}
+RUN chown -R www:www /var/www/storage
+RUN chmod -R 775 /var/www/storage
+
 USER www
 
 WORKDIR /var/www
