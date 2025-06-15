@@ -54,15 +54,12 @@ services:
   webserver:
     image: nginx:alpine
     container_name: nginx_server_prod
-    restart: always
     ports:
       - "80:80"
-      - "443:443"  # Для HTTPS
     volumes:
-      - ./nginx.prod.conf:/etc/nginx/conf.d/default.conf  # Оптимизированная конфигурация
-      - ./ssl:/etc/nginx/ssl  # SSL сертификаты
-      - laravel_storage:/var/www/storage:ro  # Только чтение
+      - ./nginx.prod.conf:/etc/nginx/conf.d/default.conf
     depends_on:
+      - frontend
       - backend
     networks:
       - app_network
@@ -71,27 +68,15 @@ services:
     build:
       context: ./frontend
       dockerfile: Dockerfile.prod
-    container_name: next_app_prod
-    ports:
-      - "3000:3000"
     expose:
-      - "3000"
+      - "3000"  # Важно: только expose без ports
     restart: always
-    working_dir: /app
-    volumes:
-      - next_cache:/app/.next  # Кеш билда
-    env_file:
-      - .env.prod
-    environment:
-      - NODE_ENV=production
-      - NEXT_TELEMETRY_DISABLED=1  # Отключаем телеметрию
     networks:
       - app_network
-    healthcheck:
-      test: ["CMD", "wget", "--spider", "http://localhost:3000"]
-      interval: 30s
-      timeout: 5s
-      retries: 3
+    # Убрали volumes (кеш Next.js будет в контейнере)
+    environment:
+      - NODE_ENV=production
+      - NEXT_TELEMETRY_DISABLED=1
 
 volumes:
   postgres_data:
