@@ -9,7 +9,9 @@ RUN apk add --no-cache \
     postgresql-dev \
     icu-dev \
     git \
-    unzip
+    unzip \
+    bash
+
 
 # PHP расширения
 RUN docker-php-ext-configure gd --with-freetype --with-jpeg
