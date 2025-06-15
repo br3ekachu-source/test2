@@ -13,15 +13,15 @@
     "isolatedModules": true,
     "jsx": "preserve",
     "incremental": true,
-    "plugins": [
-      {
-        "name": "next"
-      }
-    ],
+    "baseUrl": ".",
     "paths": {
-      "*": ["./src/resources/*"],
       "@/*": ["./src/*"],
-    }
+      "Advert/*": ["./src/resources/Advert/*"],  // Добавлен resources в путь
+      "SydnoComponents/*": ["./src/resources/SydnoComponents/*"]
+    },
+    "plugins": [{
+      "name": "next"
+    }]
   },
   "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts"],
   "exclude": ["node_modules"]

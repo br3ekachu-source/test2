@@ -1,9 +1,18 @@
-/** @type {import('next').NextConfig} */
+const path = require('path');
 
 module.exports = {
-  output: 'export',  // Ключевая настройка для SPA
-  trailingSlash: true, // Для корректных путей
+  output: 'export',
+  trailingSlash: true,
   images: {
-    unoptimized: true, // Отключаем оптимизацию изображений
+    unoptimized: true,
   },
+  webpack: (config) => {
+    config.resolve.alias = {
+      ...config.resolve.alias,
+      '@': path.resolve(__dirname, 'src'),
+      'Advert': path.resolve(__dirname, 'src/resources/Advert'),
+      'SydnoComponents': path.resolve(__dirname, 'src/resources/SydnoComponents')
+    };
+    return config;
+  }
 }
