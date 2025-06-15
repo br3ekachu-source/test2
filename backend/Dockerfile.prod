@@ -48,7 +48,9 @@ WORKDIR /var/www
 RUN mkdir -p /var/www/storage/framework/{cache,sessions,views} \
     && mkdir -p /var/www/storage/logs \
     && chown -R www:www /var/www/storage \
-    && chmod -R 775 /var/www/storage
+    && chmod -R 775 /var/www/storage \
+    && chown -R www:www /var/www/composer.*
+
 USER www
 
 # # Оптимизация Laravel
