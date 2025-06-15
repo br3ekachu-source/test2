@@ -16,7 +16,7 @@
     "baseUrl": ".",
     "paths": {
       "@/*": ["./src/*"],
-      "Advert/*": ["./src/resources/Advert/*"],  // Добавлен resources в путь
+      "Advert/*": ["./src/resources/Advert/*"],
       "SydnoComponents/*": ["./src/resources/SydnoComponents/*"]
     },
     "plugins": [{
