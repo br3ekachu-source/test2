@@ -33,11 +33,6 @@ RUN addgroup -g 1000 www && \
 
 WORKDIR /var/www
 
-# Настройка прав
-RUN mkdir -p storage/framework/{cache,sessions,views} storage/logs
-RUN chown -R www:www storage bootstrap/cache
-RUN chmod -R 775 storage bootstrap/cache
-
 USER www
 
 # Оптимизация Laravel
