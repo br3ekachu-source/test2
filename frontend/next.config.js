@@ -1,13 +1,6 @@
-const path = require('path');
+/** @type {import('next').NextConfig} */
 
-module.exports = {
-  output: 'export',
-  webpack: (config) => {
-    config.resolve.alias = {
-      ...config.resolve.alias,
-      'Advert': path.resolve(__dirname, 'src/resources/Advert'),
-      'SydnoComponents': path.resolve(__dirname, 'src/resources/SydnoComponents')
-    };
-    return config;
-  }
+const nextConfig = {
 }
+
+module.exports = nextConfig;
