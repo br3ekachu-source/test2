@@ -9,6 +9,8 @@ services:
       - "9000:9000"
     volumes:
       - ./backend:/var/www
+      # Монтируем отдельно .env.prod чтобы можно было обновлять без пересборки
+      - ./backend/.env.prod:/var/www/.env
     environment:
       - APP_ENV=production
       - APP_DEBUG=false
