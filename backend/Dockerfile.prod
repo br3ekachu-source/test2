@@ -33,12 +33,6 @@ RUN addgroup -g 1000 www && \
 
 WORKDIR /var/www
 
-# Копируем только необходимые файлы
-COPY --chown=www:www composer.* ./
-RUN composer install --no-dev --optimize-autoloader --no-interaction
-
-COPY --chown=www:www . .
-
 # Настройка прав
 RUN mkdir -p storage/framework/{cache,sessions,views} storage/logs
 RUN chown -R www:www storage bootstrap/cache
