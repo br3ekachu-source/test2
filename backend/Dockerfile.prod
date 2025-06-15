@@ -31,30 +31,32 @@ RUN addgroup -g 1000 www && \
 
 WORKDIR /var/www
 
+# Создаем необходимые директории перед копированием
+RUN mkdir -p \
+    /var/www/app/Http/Services \
+    /var/www/database \
+    /var/www/storage/framework/{cache,sessions,views} \
+    /var/www/storage/logs
+
 # Копируем только composer файлы
 COPY --chown=www:www composer.json composer.lock ./
 
-# Установка зависимостей с обработкой ошибок
-RUN set -eux; \
-    mkdir -p /var/www/database; \
-    touch /var/www/database/.gitkeep; \
-    composer install --no-dev --optimize-autoloader --no-interaction --ignore-platform-reqs || { \
-        echo "Composer install failed, retrying..."; \
-        composer clear-cache; \
-        composer install --no-dev --optimize-autoloader --no-interaction --ignore-platform-reqs; \
-    }
+# Установка зависимостей с отключением сканирования проблемных директорий
+RUN composer install --no-dev --optimize-autoloader --no-interaction \
+    --ignore-platform-reqs \
+    --no-scripts \
+    --classmap-authoritative
 
 # Копируем остальные файлы
 COPY --chown=www:www . .
 
 # Настройка прав
-RUN mkdir -p storage/framework/{cache,sessions,views} storage/logs && \
-    chown -R www:www storage bootstrap/cache && \
+RUN chown -R www:www /var/www && \
     chmod -R 775 storage bootstrap/cache
 
 USER www
 
-# Оптимизация Laravel
+# Оптимизация Laravel (после копирования всех файлов)
 RUN php artisan config:cache && \
     php artisan route:cache && \
     php artisan view:cache
