@@ -12,15 +12,18 @@ services:
     env_file:
       - ./backend/.env.prod
     environment:
-      - DB_HOST=db
-      - DB_PORT=5432
-      - XDEBUG_MODE=develop,debug
-      - XDEBUG_CONFIG="client_host=host.docker.internal"
-      - XDEBUG_CLIENT_PORT=9003
+      - APP_ENV=production
+      - APP_DEBUG=false
     extra_hosts:
       - "host.docker.internal:host-gateway"  # Для доступа к хосту из контейнера
     depends_on:
       - db
+    networks:
+      - app_network
+
+  redis:
+    image: redis:alpine
+    restart: unless-stopped
     networks:
       - app_network
 

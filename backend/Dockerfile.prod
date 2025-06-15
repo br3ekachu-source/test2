@@ -1,51 +1,55 @@
-FROM php:8.3-fpm
+FROM php:8.3-fpm-alpine
 
-RUN apt-get update && apt-get install -y \
-    build-essential \
+# Установка зависимостей
+RUN apk add --no-cache \
     libpng-dev \
-    libjpeg62-turbo-dev \
-    libfreetype6-dev \
-    locales \
-    zip \
-    jpegoptim optipng pngquant gifsicle \
-    vim \
-    unzip \
-    git \
-    curl \
-    libpq-dev \
+    libjpeg-turbo-dev \
+    freetype-dev \
     libzip-dev \
-    libicu-dev
+    postgresql-dev \
+    icu-dev \
+    git \
+    unzip
 
-RUN apt-get clean && rm -rf /var/lib/apt/lists/*
-
-RUN docker-php-ext-install pdo pdo_pgsql zip exif pcntl
+# PHP расширения
 RUN docker-php-ext-configure gd --with-freetype --with-jpeg
-RUN docker-php-ext-install gd
-RUN docker-php-ext-install intl && \
-    docker-php-ext-enable intl
+RUN docker-php-ext-install -j$(nproc) \
+    pdo pdo_pgsql \
+    gd \
+    zip \
+    intl \
+    opcache \
+    pcntl
 
-RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
+# Настройка PHP для production
+RUN mv "$PHP_INI_DIR/php.ini-production" "$PHP_INI_DIR/php.ini"
 
-RUN groupadd -g 1000 www
-RUN useradd -u 1000 -ms /bin/bash -g www www
+# Composer
+COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
-RUN pecl install xdebug-3.3.0
-RUN docker-php-ext-enable xdebug
-RUN echo "xdebug.mode=debug" >> /usr/local/etc/php/conf.d/docker-php-ext-xdebug.ini
-RUN echo "xdebug.client_host=host.docker.internal" >> /usr/local/etc/php/conf.d/docker-php-ext-xdebug.ini
-RUN echo "xdebug.start_with_request=yes" >> /usr/local/etc/php/conf.d/docker-php-ext-xdebug.ini
+# Создание пользователя
+RUN addgroup -g 1000 www && \
+    adduser -u 1000 -G www -h /var/www -D www
 
-COPY . /var/www
+WORKDIR /var/www
 
-COPY --chown=www:www . /var/www
+# Копируем только необходимые файлы
+COPY --chown=www:www composer.* ./
+RUN composer install --no-dev --optimize-autoloader --no-interaction
 
-RUN mkdir -p /var/www/storage/logs /var/www/storage/framework/{cache,sessions,testing,views}
-RUN chown -R www:www /var/www/storage
-RUN chmod -R 775 /var/www/storage
+COPY --chown=www:www . .
+
+# Настройка прав
+RUN mkdir -p storage/framework/{cache,sessions,views} storage/logs
+RUN chown -R www:www storage bootstrap/cache
+RUN chmod -R 775 storage bootstrap/cache
 
 USER www
 
-WORKDIR /var/www
+# Оптимизация Laravel
+RUN php artisan config:cache && \
+    php artisan route:cache && \
+    php artisan view:cache
 
 EXPOSE 9000
 CMD ["php-fpm"]
