@@ -20,11 +20,6 @@ COPY --chown=www-data:www-data . .
 # Копируем production .env файл
 COPY backend/.env.prod .env
 
-RUN php artisan optimize:clear \
-    && php artisan config:cache \
-    && php artisan route:cache \
-    && php artisan view:cache
-
 USER www-data
 
 EXPOSE 9000
