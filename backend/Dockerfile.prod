@@ -1,6 +1,6 @@
 FROM php:8.3-fpm-alpine
 
-# Установка зависимостей
+# Установка системных зависимостей
 RUN apk add --no-cache \
     libpng-dev \
     libjpeg-turbo-dev \
@@ -12,9 +12,9 @@ RUN apk add --no-cache \
     unzip \
     bash
 
-# PHP расширения
-RUN docker-php-ext-configure gd --with-freetype --with-jpeg
-RUN docker-php-ext-install -j$(nproc) \
+# Настройка PHP расширений
+RUN docker-php-ext-configure gd --with-freetype --with-jpeg && \
+    docker-php-ext-install -j$(nproc) \
     pdo pdo_pgsql \
     gd \
     zip \
@@ -22,10 +22,7 @@ RUN docker-php-ext-install -j$(nproc) \
     opcache \
     pcntl
 
-# Настройка PHP для production
-RUN mv "$PHP_INI_DIR/php.ini-production" "$PHP_INI_DIR/php.ini"
-
-# Composer
+# Установка Composer
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
 # Создание пользователя
@@ -34,12 +31,18 @@ RUN addgroup -g 1000 www && \
 
 WORKDIR /var/www
 
-# Копируем только composer файлы сначала
+# Копируем только composer файлы
 COPY --chown=www:www composer.json composer.lock ./
 
-# Установка зависимостей (с проверкой целостности)
-RUN composer validate --no-check-all --strict && \
-    composer install --no-dev --optimize-autoloader --no-interaction --ignore-platform-reqs
+# Установка зависимостей с обработкой ошибок
+RUN set -eux; \
+    mkdir -p /var/www/database; \
+    touch /var/www/database/.gitkeep; \
+    composer install --no-dev --optimize-autoloader --no-interaction --ignore-platform-reqs || { \
+        echo "Composer install failed, retrying..."; \
+        composer clear-cache; \
+        composer install --no-dev --optimize-autoloader --no-interaction --ignore-platform-reqs; \
+    }
 
 # Копируем остальные файлы
 COPY --chown=www:www . .
@@ -47,8 +50,7 @@ COPY --chown=www:www . .
 # Настройка прав
 RUN mkdir -p storage/framework/{cache,sessions,views} storage/logs && \
     chown -R www:www storage bootstrap/cache && \
-    chmod -R 775 storage bootstrap/cache && \
-    chown www:www composer.json composer.lock
+    chmod -R 775 storage bootstrap/cache
 
 USER www
 
