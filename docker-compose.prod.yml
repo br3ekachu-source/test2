@@ -72,6 +72,8 @@ services:
       - ./frontend/.env.production  # Для доступа к NEXT_PUBLIC_API_URL
     ports:
       - "3000:3000"
+    environment:
+      - NODE_ENV=production
     networks:
       - app_network
 
